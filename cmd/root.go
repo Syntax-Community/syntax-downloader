@@ -12,33 +12,13 @@ func Execute() {
 		return
 	}
 
-	for _, f := range os.Args[1:] {
-		if f == "-h" || f == "--help" {
-			showHelp()
-			return
-		}
-	}
-
-	url := ""
-	flags := []string{}
-
-	for i := 1; i < len(os.Args); i++ {
-		arg := os.Args[i]
-		if arg == "-mp3" || arg == "-i" || arg == "-o" {
-			flags = append(flags, arg)
-			if arg == "-o" && i+1 < len(os.Args) {
-				flags = append(flags, os.Args[i+1])
-				i++
-			}
-		} else if url == "" && arg[0] != '-' {
-			url = arg
-		}
-	}
-
-	if url == "" {
-		utils.Error("get -h")
+	if os.Args[1] == "-h" || os.Args[1] == "--help" {
+		showHelp()
 		return
 	}
+
+	url := os.Args[1]
+	flags := os.Args[2:]
 
 	output := utils.DefaultDownloadDir()
 	mp3 := false
@@ -55,9 +35,13 @@ func Execute() {
 				output = flags[i+1]
 				i++
 			}
+		case "-h", "--help":
+			showHelp()
+			return
 		}
 	}
 
+	output = utils.ExpandPath(output)
 	utils.EnsureDir(output)
 
 	if info {
@@ -82,14 +66,14 @@ Usage: get <url> [options]
 
 Options:
   -mp3         Extract audio as MP3
-  -i           Show video/audio info only
-  -o <folder>  Specify output folder
-  -h, --help   Show this help message
+  -i           Show media info only
+  -o <folder>  Output directory
+  -h, --help   Show this help
 
 Examples:
-  get https://youtu.be/xyz123
-  get https://youtu.be/xyz123 -mp3
-  get https://youtu.be/xyz123 -mp3 -o ~/Downloads/Music
-  get https://youtu.be/xyz123 -i
+  get https://youtu.be/xyz
+  get https://youtu.be/xyz -mp3
+  get https://youtu.be/xyz -o ~/Downloads
+  get https://youtu.be/xyz -i
 `)
 }
